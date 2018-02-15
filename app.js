@@ -66,8 +66,8 @@ intents.matches('YesHandler', (session) => {
 		var baseProgress = session.dialogData.progress;
 		var nextProgress = selinaConv[baseProgress]['yesHandle']['progressPath'];
 		session.dialogData.progress = nextProgress;
-		var msg = selinaConv[baseProgress]['text'];
-		builder.Prompts.text(session, msg);
+		var msg = selinaConv[nextProgress]['text'];
+		session.send(msg);
 	}else{
 		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 	}
@@ -79,8 +79,8 @@ intents.matches('noHandler', (session) => {
 		var baseProgress = session.dialogData.progress;
 		var nextProgress = selinaConv[baseProgress]['noHandle']['progressPath'];
 		session.dialogData.progress = nextProgress;
-		var msg = selinaConv[baseProgress]['text'];
-		builder.Prompts.text(session, msg);
+		var msg = selinaConv[nextProgress]['text'];
+		session.send(msg);
 	}else{
 		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 	}
