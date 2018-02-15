@@ -5,10 +5,11 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var selinaConv = require('./convjson');
 
 // Setup Restify Server
 var server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3978, function () {
+server.listen(process.env.port || process.env.PORT || 8080, function () {
    console.log('%s listening to %s', server.name, server.url); 
 });
   
@@ -33,7 +34,9 @@ var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.
 var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
 // Create your bot with a function to receive messages from the user
-var bot = new builder.UniversalBot(connector);
+var bot = new builder.UniversalBot(connector, function (session) {
+    session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
+});
 bot.set('storage', tableStorage);
 
 // Make sure you add code to validate these fields
@@ -45,7 +48,52 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' +
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
-var intents = new builder.IntentDialog({ recognizers: [recognizer] })
+bot.recognizer(recognizer);
+
+bot.dialog('Greeting', 
+	(session, args) => {
+		if(!session.dialogData.progress){
+			var msg = selinaConv['sess1conv1']['text'];
+			session.dialogData.progress = 'sess1conv1';
+			builder.Prompts.text(session, msg);
+		}
+	}
+).triggerAction({
+    matches: 'Greeting'
+});
+
+bot.dialog('YesHandler',
+	(session, args) => {
+		if(session.dialogData.progress){
+			//getting the yes progress section
+			var baseProgress = session.dialogData.progress;
+			var nextProgress = selinaConv[baseProgress]['yesHandle']['progressPath'];
+			session.dialogData.progress = nextProgress;
+			var msg = selinaConv[baseProgress]['text'];
+			builder.Prompts.text(session, msg);
+		}
+	}
+).triggerAction({
+    matches: 'YesHandler'
+});
+
+bot.dialog('noHandler',
+	(session, args) => {
+		if(session.dialogData.progress){
+			//getting the yes progress section
+			var baseProgress = session.dialogData.progress;
+			var nextProgress = selinaConv[baseProgress]['noHandle']['progressPath'];
+			session.dialogData.progress = nextProgress;
+			var msg = selinaConv[baseProgress]['text'];
+			builder.Prompts.text(session, msg);
+		}
+	}
+).triggerAction({
+    matches: 'noHandler'
+});
+
+
+/*var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 .matches('Greeting', (session) => {
     session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
 })
@@ -55,12 +103,9 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 .matches('Cancel', (session) => {
     session.send('You reached Cancel intent, you said \'%s\'.', session.message.text);
 })
-/*
-.matches('<yourIntent>')... See details at http://docs.botframework.com/builder/node/guides/understanding-natural-language/
-*/
 .onDefault((session) => {
     session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 });
 
-bot.dialog('/', intents);    
+bot.dialog('/', intents);*/    
 
