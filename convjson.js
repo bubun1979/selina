@@ -51,4 +51,6 @@ var obj = {
 		text: "Okay. Great!",
 		handlers: 0,
 	}
-}
+};
+
+module.exports = obj;

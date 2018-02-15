@@ -5,6 +5,7 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
+var selinaConv = require('./convjson');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -49,7 +50,40 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', intents);
 
 intents.matches('Greeting', (session) => {
-    session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
+	if(!session.dialogData.progress){
+		var msg = selinaConv['sess1conv1']['text'];
+		session.dialogData.progress = 'sess1conv1';
+		session.send(msg);
+	}else{
+		session.send('You reached Greeting intent, you said \'%s\'.', session.message.text);
+	}
+    
+});
+
+intents.matches('YesHandler', (session) => {
+	if(session.dialogData.progress){
+		//getting the yes progress section
+		var baseProgress = session.dialogData.progress;
+		var nextProgress = selinaConv[baseProgress]['yesHandle']['progressPath'];
+		session.dialogData.progress = nextProgress;
+		var msg = selinaConv[baseProgress]['text'];
+		builder.Prompts.text(session, msg);
+	}else{
+		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
+	}
+});
+
+intents.matches('noHandler', (session) => {
+	if(session.dialogData.progress){
+		//getting the yes progress section
+		var baseProgress = session.dialogData.progress;
+		var nextProgress = selinaConv[baseProgress]['noHandle']['progressPath'];
+		session.dialogData.progress = nextProgress;
+		var msg = selinaConv[baseProgress]['text'];
+		builder.Prompts.text(session, msg);
+	}else{
+		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
+	}
 });
 
 intents.matches('Help', (session) => {
