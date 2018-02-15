@@ -29,9 +29,19 @@ server.post('/api/messages', connector.listen());
 * For samples and documentation, see: https://github.com/Microsoft/BotBuilder-Azure
 * ---------------------------------------------------------------------------------------- */
 
-var tableName = 'botdata';
+const documentDbOptions = {
+    host: 'https://selinadb.documents.azure.com:443/',
+    masterKey: 'pEeWLDy6ldH8fE9xxRroUHUmlTMREHRorTJ41ttyXrfExaRDPKUDU6DPAD5TjlgfM1aZCb0WLvHptZSWhNnAYA==',
+    database: 'selinaChatDb',
+    collection: 'botData'
+};
+
+const docDbClient = new botbuilder_azure.DocumentDbClient(documentDbOptions);
+const tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, docDbClient);
+
+/*var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
-var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
+var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);*/
 
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
