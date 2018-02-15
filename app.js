@@ -63,11 +63,12 @@ intents.matches('Greeting', (session) => {
 intents.matches('YesHandler', (session) => {
 	if(session.dialogData.progress){
 		//getting the yes progress section
-		var baseProgress = session.dialogData.progress;
+		progressChecker(session, 'yesHandle');
+		/*var baseProgress = session.dialogData.progress;
 		var nextProgress = selinaConv[baseProgress]['yesHandle']['progressPath'];
 		session.dialogData.progress = nextProgress;
 		var msg = selinaConv[nextProgress]['text'];
-		session.send(msg);
+		session.send(msg);*/
 	}else{
 		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 	}
@@ -75,12 +76,13 @@ intents.matches('YesHandler', (session) => {
 
 intents.matches('noHandler', (session) => {
 	if(session.dialogData.progress){
-		//getting the yes progress section
-		var baseProgress = session.dialogData.progress;
+		//getting the no progress section
+		progressChecker(session, 'noHandle');
+		/*var baseProgress = session.dialogData.progress;
 		var nextProgress = selinaConv[baseProgress]['noHandle']['progressPath'];
 		session.dialogData.progress = nextProgress;
 		var msg = selinaConv[nextProgress]['text'];
-		session.send(msg);
+		session.send(msg);*/
 	}else{
 		session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 	}
@@ -93,6 +95,17 @@ intents.matches('Help', (session) => {
 intents.onDefault((session) => {
     session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 });
+
+const progressChecker = (session, handlerType) => {
+	var baseProgress = session.dialogData.progress;
+	var nextProgress = selinaConv[baseProgress][handlerType]['progressPath'];
+	session.dialogData.progress = nextProgress;
+	var msg = selinaConv[nextProgress]['text'];
+	session.send(msg);
+	if(selinaConv[nextProgress]['handlers'] == 0){
+		session.endDialog();
+	}
+};
 
 /*var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 .matches('Greeting', (session) => {
